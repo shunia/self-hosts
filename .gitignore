@@ -1,0 +1,29 @@
+# Secrets
+.env
+.env.*
+
+# Allow example env templates
+!.env.example
+!.env.*.example
+.env.backup
+
+# Runtime data
+*-data/
+traefik-data/
+vw-data/
+sub2api-data/
+sub2api-postgres-data/
+sub2api-redis-data/
+cliproxyapi-data/
+lobehub-data/
+
+# Backup artifacts
+_backup_staging/
+_restore/
+.backup.lock
+
+# Tooling
+.codex/
+
+# Logs
+homepage-config/logs/

@@ -1,0 +1,93 @@
+services:
+  docker-socket-proxy:
+    image: "ghcr.io/tecnativa/docker-socket-proxy:0.3.0"
+    container_name: "docker-socket-proxy"
+    restart: unless-stopped
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      CONTAINERS: 1
+      EVENTS: 1
+      NETWORKS: 1
+      PING: 1
+      VERSION: 1
+    networks:
+      - socket_proxy
+
+  traefik:
+    image: "traefik@sha256:a9890c898f379c1905ee5b28342f6b408dc863f08db2dab20e46c267d1ff463a"
+    container_name: "traefik"
+    restart: unless-stopped
+    depends_on:
+      - docker-socket-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./traefik-data/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "./traefik-data/acme.json:/etc/traefik/acme.json"
+      - "./traefik-data/logs:/var/log/traefik"
+    networks:
+      - traefik_proxy
+      - socket_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.qfhuang.pw`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=myresolver"
+      - "traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth,dashboard-ipallowlist,dashboard-ratelimit"
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH:?FILL_TRAEFIK_DASHBOARD_AUTH_BCRYPT}"
+      - "traefik.http.middlewares.dashboard-ipallowlist.ipallowlist.sourcerange=${TRAEFIK_DASHBOARD_ALLOWLIST:?FILL_TRAEFIK_DASHBOARD_ALLOWLIST}"
+      - "traefik.http.middlewares.dashboard-ratelimit.ratelimit.average=30"
+      - "traefik.http.middlewares.dashboard-ratelimit.ratelimit.period=1m"
+      - "traefik.http.middlewares.dashboard-ratelimit.ratelimit.burst=60"
+
+  vaultwarden:
+    image: "vaultwarden/server@sha256:d89a6d21e361254670c24a4272b4b5f245e402c284f2f55de2c379fdbcfa1fa5"
+    container_name: "vaultwarden"
+    restart: unless-stopped
+    volumes:
+      - "./vw-data:/data"
+    environment:
+      WEBSOCKET_ENABLED: "true"
+      ADMIN_TOKEN: ""
+      SIGNUPS_ALLOWED: "false"
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vaultwarden-http.rule=Host(`vaultwarden.qfhuang.pw`)"
+      - "traefik.http.routers.vaultwarden-http.entrypoints=websecure"
+      - "traefik.http.routers.vaultwarden-http.service=vaultwarden-svc"
+      - "traefik.http.routers.vaultwarden-http.tls.certresolver=myresolver"
+      - "traefik.http.routers.vaultwarden-ws.rule=Host(`vaultwarden.qfhuang.pw`) && Path(`/notifications/hub`)"
+      - "traefik.http.routers.vaultwarden-ws.entrypoints=websecure"
+      - "traefik.http.routers.vaultwarden-ws.service=vaultwarden-ws-svc"
+      - "traefik.http.routers.vaultwarden-ws.tls.certresolver=myresolver"
+      - "traefik.http.services.vaultwarden-svc.loadbalancer.server.port=80"
+      - "traefik.http.services.vaultwarden-ws-svc.loadbalancer.server.port=3012"
+
+  homepage:
+    image: "ghcr.io/gethomepage/homepage:latest"
+    container_name: "homepage"
+    restart: unless-stopped
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: "${HOMEPAGE_ALLOWED_HOSTS:-home.qfhuang.pw}"
+    volumes:
+      - "./homepage-config:/app/config"
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.http.routers.homepage.rule=Host(`${HOMEPAGE_DOMAIN:-home.qfhuang.pw}`)"
+      - "traefik.http.routers.homepage.entrypoints=websecure"
+      - "traefik.http.routers.homepage.tls.certresolver=myresolver"
+      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
+
+networks:
+  traefik_proxy:
+    name: traefik_proxy
+  socket_proxy:
+    name: socket_proxy

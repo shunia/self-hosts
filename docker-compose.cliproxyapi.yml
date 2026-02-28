@@ -1,0 +1,59 @@
+services:
+  cliproxyapi:
+    image: "eceasy/cli-proxy-api:latest"
+    container_name: "cliproxyapi"
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 100000
+        hard: 100000
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    tmpfs:
+      - "/tmp:size=64m,noexec,nosuid,nodev,mode=1777"
+      - "/CLIProxyAPI/static:size=64m,noexec,nosuid,nodev,mode=1777"
+    volumes:
+      - "./cliproxyapi-data/config/config.yaml:/CLIProxyAPI/config.yaml"
+      - "./cliproxyapi-data/auths:/root/.cli-proxy-api"
+      - "./cliproxyapi-data/logs:/CLIProxyAPI/logs"
+    environment:
+      TZ: "${CLIPROXYAPI_TZ:-Asia/Shanghai}"
+      DEPLOY_MODE: "${CLIPROXYAPI_DEPLOY_MODE:-single}"
+      DISABLE_AUTO_AUTH: "${CLIPROXYAPI_DISABLE_AUTO_AUTH:-false}"
+      DEBUG: "${CLIPROXYAPI_DEBUG:-false}"
+      AUTO_CLEANUP_AUTHS: "${CLIPROXYAPI_AUTO_CLEANUP_AUTHS:-true}"
+      CLEANUP_DAYS: "${CLIPROXYAPI_CLEANUP_DAYS:-7}"
+      AUTH_ENCRYPTION_KEY: "${CLIPROXYAPI_AUTH_ENCRYPTION_KEY:?FILL_CLIPROXYAPI_AUTH_ENCRYPTION_KEY}"
+    expose:
+      - "8080"
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.http.routers.cliproxyapi.rule=Host(`${CLIPROXYAPI_DOMAIN:?FILL_CLIPROXYAPI_DOMAIN}`)"
+      - "traefik.http.routers.cliproxyapi.entrypoints=websecure"
+      - "traefik.http.routers.cliproxyapi.tls.certresolver=myresolver"
+      - "traefik.http.routers.cliproxyapi.priority=10"
+      - "traefik.http.routers.cliproxyapi.middlewares=cliproxyapi-origin-allowlist,cliproxyapi-security-headers,cliproxyapi-ratelimit"
+      - "traefik.http.services.cliproxyapi.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.cliproxyapi-origin-allowlist.ipallowlist.sourcerange=${TRAEFIK_DASHBOARD_ALLOWLIST:?FILL_TRAEFIK_DASHBOARD_ALLOWLIST}"
+      - "traefik.http.middlewares.cliproxyapi-ratelimit.ratelimit.average=600"
+      - "traefik.http.middlewares.cliproxyapi-ratelimit.ratelimit.period=1m"
+      - "traefik.http.middlewares.cliproxyapi-ratelimit.ratelimit.burst=200"
+      - "traefik.http.middlewares.cliproxyapi-security-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.cliproxyapi-security-headers.headers.frameDeny=true"
+      - "traefik.http.middlewares.cliproxyapi-security-headers.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.cliproxyapi-security-headers.headers.referrerPolicy=no-referrer"
+      - "traefik.http.middlewares.cliproxyapi-security-headers.headers.permissionsPolicy=geolocation=(),camera=(),microphone=()"
+      - "traefik.http.middlewares.cliproxyapi-security-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.cliproxyapi-security-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.cliproxyapi-security-headers.headers.stsPreload=true"
+      - "traefik.http.middlewares.cliproxyapi-security-headers.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.cliproxyapi-security-headers.headers.customResponseHeaders.Server="
+
+networks:
+  traefik_proxy:
+    external: true
