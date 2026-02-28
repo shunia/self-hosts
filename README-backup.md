@@ -77,3 +77,25 @@ Use `cron` or `systemd timer` to run daily:
 ```bash
 0 3 * * * cd /opt/docker-compose && ./backup.sh >> /var/log/docker-compose-backup.log 2>&1
 ```
+
+## 8) Full restore to current directory (helper)
+
+If you want to restore a snapshot directly into the current working directory
+(overwriting files), use the helper script:
+
+```bash
+./restore-to-current.sh --force
+```
+
+Optional:
+
+```bash
+./restore-to-current.sh --snapshot <id|latest> --force
+```
+
+What it does:
+- Restores snapshot into `./_restore/<timestamp>`
+- Stops stacks
+- rsync restored content into current directory
+- Starts databases and imports SQL dumps if present
+- Starts all stacks and prints status
