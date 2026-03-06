@@ -12,15 +12,7 @@
         href: "https://vaultwarden.qfhuang.pw"
         description: "Password manager"
         icon: "vaultwarden.png"
-    - Sub2API:
-        href: "https://sub2api.qfhuang.pw"
-        description: "API gateway"
-        icon: "si-openai"
     - CLIProxyAPI:
         href: "https://cpa.qfhuang.pw/management.html"
         description: "CLI proxy API"
         icon: "mdi-api"
-    - LobeHub:
-        href: "https://chat.qfhuang.pw"
-        description: "AI chat workspace"
-        icon: "si-openai"

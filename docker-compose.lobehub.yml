@@ -1,92 +1,92 @@
-services:
-  lobehub-postgres:
-    image: "pgvector/pgvector:pg17"
-    container_name: "lobehub-postgres"
-    restart: unless-stopped
-    mem_limit: "256m"
-    cpus: "0.40"
-    pids_limit: 256
-    security_opt:
-      - "no-new-privileges:true"
-    tmpfs:
-      - "/tmp:size=64m,noexec,nosuid,nodev,mode=1777"
-    command:
-      - "postgres"
-      - "-c"
-      - "shared_buffers=64MB"
-      - "-c"
-      - "work_mem=4MB"
-      - "-c"
-      - "maintenance_work_mem=64MB"
-      - "-c"
-      - "max_connections=40"
-    environment:
-      TZ: "${LOBEHUB_TZ:-Asia/Shanghai}"
-      POSTGRES_DB: "lobehub"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "${LOBEHUB_DB_PASSWORD:?FILL_LOBEHUB_DB_PASSWORD}"
-    volumes:
-      - "./lobehub-data/postgres:/var/lib/postgresql/data"
-
-  lobehub:
-    image: "lobehub/lobehub:latest"
-    container_name: "lobehub"
-    restart: unless-stopped
-    mem_limit: "768m"
-    cpus: "0.60"
-    pids_limit: 384
-    security_opt:
-      - "no-new-privileges:true"
-    cap_drop:
-      - ALL
-    tmpfs:
-      - "/tmp:size=64m,noexec,nosuid,nodev,mode=1777"
-    environment:
-      TZ: "${LOBEHUB_TZ:-Asia/Shanghai}"
-      APP_URL: "${LOBEHUB_APP_URL:?FILL_LOBEHUB_APP_URL}"
-      DATABASE_URL: "postgresql://postgres:${LOBEHUB_DB_PASSWORD:?FILL_LOBEHUB_DB_PASSWORD}@lobehub-postgres:5432/lobehub"
-      BETTER_AUTH_SECRET: "${LOBEHUB_BETTER_AUTH_SECRET:?FILL_LOBEHUB_BETTER_AUTH_SECRET}"
-      KEY_VAULTS_SECRET: "${LOBEHUB_KEY_VAULTS_SECRET:?FILL_LOBEHUB_KEY_VAULTS_SECRET}"
-      S3_ENDPOINT: "${LOBEHUB_S3_ENDPOINT:-http://127.0.0.1:9000}"
-      S3_ACCESS_KEY_ID: "${LOBEHUB_S3_ACCESS_KEY_ID:?FILL_LOBEHUB_S3_ACCESS_KEY_ID}"
-      S3_SECRET_ACCESS_KEY: "${LOBEHUB_S3_SECRET_ACCESS_KEY:?FILL_LOBEHUB_S3_SECRET_ACCESS_KEY}"
-      S3_BUCKET: "${LOBEHUB_S3_BUCKET:?FILL_LOBEHUB_S3_BUCKET}"
-      S3_REGION: "${LOBEHUB_S3_REGION:-us-east-1}"
-      S3_ENABLE_PATH_STYLE: "${LOBEHUB_S3_ENABLE_PATH_STYLE:-1}"
-      S3_SET_ACL: "${LOBEHUB_S3_SET_ACL:-0}"
-      AUTH_ALLOWED_EMAILS: "${LOBEHUB_AUTH_ALLOWED_EMAILS:-}"
-      OPENAI_API_KEY: "${LOBEHUB_OPENAI_API_KEY:?FILL_LOBEHUB_OPENAI_API_KEY}"
-      OPENAI_PROXY_URL: "${LOBEHUB_OPENAI_PROXY_URL:-http://cliproxyapi:8080/v1}"
-    expose:
-      - "3210"
-    depends_on:
-      - lobehub-postgres
-    networks:
-      - default
-      - traefik_proxy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.http.routers.lobehub.rule=Host(`${LOBEHUB_DOMAIN:?FILL_LOBEHUB_DOMAIN}`)"
-      - "traefik.http.routers.lobehub.entrypoints=websecure"
-      - "traefik.http.routers.lobehub.tls.certresolver=myresolver"
-      - "traefik.http.routers.lobehub.priority=10"
-      - "traefik.http.routers.lobehub.middlewares=lobehub-security-headers,lobehub-ratelimit"
-      - "traefik.http.services.lobehub.loadbalancer.server.port=3210"
-      - "traefik.http.middlewares.lobehub-ratelimit.ratelimit.average=300"
-      - "traefik.http.middlewares.lobehub-ratelimit.ratelimit.period=1m"
-      - "traefik.http.middlewares.lobehub-ratelimit.ratelimit.burst=120"
-      - "traefik.http.middlewares.lobehub-security-headers.headers.contentTypeNosniff=true"
-      - "traefik.http.middlewares.lobehub-security-headers.headers.frameDeny=true"
-      - "traefik.http.middlewares.lobehub-security-headers.headers.browserXssFilter=true"
-      - "traefik.http.middlewares.lobehub-security-headers.headers.referrerPolicy=no-referrer"
-      - "traefik.http.middlewares.lobehub-security-headers.headers.permissionsPolicy=geolocation=(),camera=(),microphone=()"
-      - "traefik.http.middlewares.lobehub-security-headers.headers.stsSeconds=31536000"
-      - "traefik.http.middlewares.lobehub-security-headers.headers.stsIncludeSubdomains=true"
-      - "traefik.http.middlewares.lobehub-security-headers.headers.stsPreload=true"
-      - "traefik.http.middlewares.lobehub-security-headers.headers.forceSTSHeader=true"
-      - "traefik.http.middlewares.lobehub-security-headers.headers.customResponseHeaders.Server="
-
+# services:
+#   lobehub-postgres:
+#     image: "pgvector/pgvector:pg17"
+#     container_name: "lobehub-postgres"
+#     restart: unless-stopped
+#     mem_limit: "256m"
+#     cpus: "0.40"
+#     pids_limit: 256
+#     security_opt:
+#       - "no-new-privileges:true"
+#     tmpfs:
+#       - "/tmp:size=64m,noexec,nosuid,nodev,mode=1777"
+#     command:
+#       - "postgres"
+#       - "-c"
+#       - "shared_buffers=64MB"
+#       - "-c"
+#       - "work_mem=4MB"
+#       - "-c"
+#       - "maintenance_work_mem=64MB"
+#       - "-c"
+#       - "max_connections=40"
+#     environment:
+#       TZ: "${LOBEHUB_TZ:-Asia/Shanghai}"
+#       POSTGRES_DB: "lobehub"
+#       POSTGRES_USER: "postgres"
+#       POSTGRES_PASSWORD: "${LOBEHUB_DB_PASSWORD:?FILL_LOBEHUB_DB_PASSWORD}"
+#     volumes:
+#       - "./lobehub-data/postgres:/var/lib/postgresql/data"
+#
+#   lobehub:
+#     image: "lobehub/lobehub:latest"
+#     container_name: "lobehub"
+#     restart: unless-stopped
+#     mem_limit: "768m"
+#     cpus: "0.60"
+#     pids_limit: 384
+#     security_opt:
+#       - "no-new-privileges:true"
+#     cap_drop:
+#       - ALL
+#     tmpfs:
+#       - "/tmp:size=64m,noexec,nosuid,nodev,mode=1777"
+#     environment:
+#       TZ: "${LOBEHUB_TZ:-Asia/Shanghai}"
+#       APP_URL: "${LOBEHUB_APP_URL:?FILL_LOBEHUB_APP_URL}"
+#       DATABASE_URL: "postgresql://postgres:${LOBEHUB_DB_PASSWORD:?FILL_LOBEHUB_DB_PASSWORD}@lobehub-postgres:5432/lobehub"
+#       BETTER_AUTH_SECRET: "${LOBEHUB_BETTER_AUTH_SECRET:?FILL_LOBEHUB_BETTER_AUTH_SECRET}"
+#       KEY_VAULTS_SECRET: "${LOBEHUB_KEY_VAULTS_SECRET:?FILL_LOBEHUB_KEY_VAULTS_SECRET}"
+#       S3_ENDPOINT: "${LOBEHUB_S3_ENDPOINT:-http://127.0.0.1:9000}"
+#       S3_ACCESS_KEY_ID: "${LOBEHUB_S3_ACCESS_KEY_ID:?FILL_LOBEHUB_S3_ACCESS_KEY_ID}"
+#       S3_SECRET_ACCESS_KEY: "${LOBEHUB_S3_SECRET_ACCESS_KEY:?FILL_LOBEHUB_S3_SECRET_ACCESS_KEY}"
+#       S3_BUCKET: "${LOBEHUB_S3_BUCKET:?FILL_LOBEHUB_S3_BUCKET}"
+#       S3_REGION: "${LOBEHUB_S3_REGION:-us-east-1}"
+#       S3_ENABLE_PATH_STYLE: "${LOBEHUB_S3_ENABLE_PATH_STYLE:-1}"
+#       S3_SET_ACL: "${LOBEHUB_S3_SET_ACL:-0}"
+#       AUTH_ALLOWED_EMAILS: "${LOBEHUB_AUTH_ALLOWED_EMAILS:-}"
+#       OPENAI_API_KEY: "${LOBEHUB_OPENAI_API_KEY:?FILL_LOBEHUB_OPENAI_API_KEY}"
+#       OPENAI_PROXY_URL: "${LOBEHUB_OPENAI_PROXY_URL:-http://cliproxyapi:8080/v1}"
+#     expose:
+#       - "3210"
+#     depends_on:
+#       - lobehub-postgres
+#     networks:
+#       - default
+#       - traefik_proxy
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.docker.network=traefik_proxy"
+#       - "traefik.http.routers.lobehub.rule=Host(`${LOBEHUB_DOMAIN:?FILL_LOBEHUB_DOMAIN}`)"
+#       - "traefik.http.routers.lobehub.entrypoints=websecure"
+#       - "traefik.http.routers.lobehub.tls.certresolver=myresolver"
+#       - "traefik.http.routers.lobehub.priority=10"
+#       - "traefik.http.routers.lobehub.middlewares=lobehub-security-headers,lobehub-ratelimit"
+#       - "traefik.http.services.lobehub.loadbalancer.server.port=3210"
+#       - "traefik.http.middlewares.lobehub-ratelimit.ratelimit.average=300"
+#       - "traefik.http.middlewares.lobehub-ratelimit.ratelimit.period=1m"
+#       - "traefik.http.middlewares.lobehub-ratelimit.ratelimit.burst=120"
+#       - "traefik.http.middlewares.lobehub-security-headers.headers.contentTypeNosniff=true"
+#       - "traefik.http.middlewares.lobehub-security-headers.headers.frameDeny=true"
+#       - "traefik.http.middlewares.lobehub-security-headers.headers.browserXssFilter=true"
+#       - "traefik.http.middlewares.lobehub-security-headers.headers.referrerPolicy=no-referrer"
+#       - "traefik.http.middlewares.lobehub-security-headers.headers.permissionsPolicy=geolocation=(),camera=(),microphone=()"
+#       - "traefik.http.middlewares.lobehub-security-headers.headers.stsSeconds=31536000"
+#       - "traefik.http.middlewares.lobehub-security-headers.headers.stsIncludeSubdomains=true"
+#       - "traefik.http.middlewares.lobehub-security-headers.headers.stsPreload=true"
+#       - "traefik.http.middlewares.lobehub-security-headers.headers.forceSTSHeader=true"
+#       - "traefik.http.middlewares.lobehub-security-headers.headers.customResponseHeaders.Server="
+#
 networks:
   traefik_proxy:
     external: true
