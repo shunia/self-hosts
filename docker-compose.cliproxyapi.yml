@@ -1,6 +1,6 @@
 services:
   cliproxyapi:
-    image: "eceasy/cli-proxy-api:latest"
+    image: "eceasy/cli-proxy-api@sha256:8ffc6a6ebee2eb072ad5dea03b2da8b3e8eeca36afbbf4f1ae142a3571690a9a"
     container_name: "cliproxyapi"
     restart: unless-stopped
     ulimits:
