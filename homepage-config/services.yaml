@@ -12,6 +12,10 @@
         href: "https://vaultwarden.qfhuang.pw"
         description: "Password manager"
         icon: "vaultwarden.png"
+    - Xray:
+        href: "https://xray.260055.xyz"
+        description: "VLESS over XHTTP H2 endpoint"
+        icon: "mdi-access-point-network"
     - CLIProxyAPI:
         href: "https://cpa.qfhuang.pw/management.html"
         description: "CLI proxy API"

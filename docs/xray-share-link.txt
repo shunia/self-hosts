@@ -1,0 +1,1 @@
+vless://248c20b6-83a8-4770-845b-ac46e992400c@xray.260055.xyz:443?encryption=none&security=tls&sni=xray.260055.xyz&alpn=h2&type=xhttp&path=/ray/&mode=auto#xray.260055.xyz%20xhttp%20h2
