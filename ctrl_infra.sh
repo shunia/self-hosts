@@ -16,13 +16,13 @@ compose() {
 
 usage() {
   cat <<'USAGE'
-Usage: ./docker_compose_ctl.sh <command> [args]
+Usage: ./ctrl_infra.sh <command> [args]
 
 Commands:
-  start           Start all services (up -d)
-  stop            Stop all services
-  restart         Restart all services
-  rebuild         Recreate containers (up -d --force-recreate --remove-orphans)
+  start           Start infra services (xray is included, but prefer ./ctrl_xray.sh for xray-only ops)
+  stop            Stop infra services
+  restart         Restart infra services
+  rebuild         Recreate infra containers (up -d --force-recreate --remove-orphans)
   pull            Pull latest images for this stack
   down            Stop and remove containers/network (keep data volumes)
   status          Show service status
@@ -30,9 +30,10 @@ Commands:
   config          Validate and print merged compose config
 
 Examples:
-  ./docker_compose_ctl.sh start
-  ./docker_compose_ctl.sh logs traefik
-  ./docker_compose_ctl.sh rebuild
+  ./ctrl_infra.sh start
+  ./ctrl_infra.sh logs traefik
+  ./ctrl_xray.sh restart
+  ./ctrl_infra.sh rebuild
 USAGE
 }
 

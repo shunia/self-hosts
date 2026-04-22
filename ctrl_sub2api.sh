@@ -23,7 +23,7 @@ compose() {
 
 usage() {
   cat <<'USAGE'
-Usage: ./sub2api_ctl.sh <command> [args]
+Usage: ./ctrl_sub2api.sh <command> [args]
 
 Commands:
   start           Start all sub2api services (up -d)
@@ -37,9 +37,9 @@ Commands:
   config          Validate and print merged compose config
 
 Examples:
-  ./sub2api_ctl.sh start
-  ./sub2api_ctl.sh logs sub2api
-  ./sub2api_ctl.sh rebuild
+  ./ctrl_sub2api.sh start
+  ./ctrl_sub2api.sh logs sub2api
+  ./ctrl_sub2api.sh rebuild
 USAGE
 }
 
