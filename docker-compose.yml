@@ -1,6 +1,6 @@
 services:
   docker-socket-proxy:
-    image: "ghcr.io/tecnativa/docker-socket-proxy:0.3.0"
+    image: "ghcr.io/tecnativa/docker-socket-proxy:0.4.2@sha256:1f3a6f303320723d199d2316a3e82b2e2685d86c275d5e3deeaf182573b47476"
     container_name: "docker-socket-proxy"
     restart: unless-stopped
     volumes:
@@ -15,7 +15,7 @@ services:
       - socket_proxy
 
   traefik:
-    image: "traefik@sha256:a9890c898f379c1905ee5b28342f6b408dc863f08db2dab20e46c267d1ff463a"
+    image: "traefik:v3.6.9@sha256:9004e1cd1e33c5eb0b6ec02bc6cfda61fe9caca36751114b1c9c6662f01b264a"
     container_name: "traefik"
     restart: unless-stopped
     depends_on:
@@ -44,7 +44,7 @@ services:
       - "traefik.http.middlewares.dashboard-ratelimit.ratelimit.burst=60"
 
   vaultwarden:
-    image: "vaultwarden/server@sha256:d89a6d21e361254670c24a4272b4b5f245e402c284f2f55de2c379fdbcfa1fa5"
+    image: "vaultwarden/server:1.35.4@sha256:43498a94b22f9563f2a94b53760ab3e710eefc0d0cac2efda4b12b9eb8690664"
     container_name: "vaultwarden"
     restart: unless-stopped
     volumes:
@@ -86,8 +86,8 @@ services:
       - "traefik.http.routers.xray.rule=Host(`${XRAY_DOMAIN:?FILL_XRAY_DOMAIN}`) && (Path(`/ray`) || PathPrefix(`/ray/`))"
       - "traefik.http.routers.xray.entrypoints=websecure"
       - "traefik.http.routers.xray.tls.certresolver=myresolver"
-      - "traefik.http.services.xray.loadbalancer.server.scheme=h2c"
       - "traefik.http.services.xray.loadbalancer.server.port=10000"
+      - "traefik.http.services.xray.loadbalancer.server.scheme=h2c"
 
   projects:
     build:
