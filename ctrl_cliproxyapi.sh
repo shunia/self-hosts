@@ -4,6 +4,8 @@ set -euo pipefail
 PROJECT="cliproxyapi"
 ENV_FILE=".env"
 COMPOSE_FILE="docker-compose.cliproxyapi.yml"
+CONFIG_TEMPLATE="templates/cliproxyapi-config.yaml.example"
+CONFIG_FILE="cliproxyapi-data/config/config.yaml"
 
 cd "$(dirname "$0")"
 
@@ -19,6 +21,32 @@ fi
 
 compose() {
   docker compose --env-file "$ENV_FILE" -p "$PROJECT" -f "$COMPOSE_FILE" "$@"
+}
+
+ensure_runtime_config() {
+  if [[ ! -f "$CONFIG_TEMPLATE" ]]; then
+    echo "[ERROR] Missing $CONFIG_TEMPLATE" >&2
+    exit 1
+  fi
+
+  mkdir -p "cliproxyapi-data/config" "cliproxyapi-data/auths" "cliproxyapi-data/logs"
+
+  if [[ ! -f "$CONFIG_FILE" ]]; then
+    cp "$CONFIG_TEMPLATE" "$CONFIG_FILE"
+    echo "[WARN] Initialized $CONFIG_FILE from template; review upstreams and API keys before exposing the service." >&2
+  fi
+}
+
+ensure_permissions() {
+  if [[ -d "cliproxyapi-data/auths" ]]; then
+    chmod 700 "cliproxyapi-data/auths"
+    find "cliproxyapi-data/auths" -type f -exec chmod 600 {} +
+  fi
+
+  if [[ -d "cliproxyapi-data/config" ]]; then
+    chmod 700 "cliproxyapi-data/config"
+    find "cliproxyapi-data/config" -type f -exec chmod 600 {} +
+  fi
 }
 
 usage() {
@@ -48,15 +76,21 @@ shift || true
 
 case "$cmd" in
   start)
+    ensure_runtime_config
+    ensure_permissions
     compose up -d
     ;;
   stop)
     compose stop
     ;;
   restart)
+    ensure_runtime_config
+    ensure_permissions
     compose restart
     ;;
   rebuild)
+    ensure_runtime_config
+    ensure_permissions
     compose up -d --force-recreate --remove-orphans
     ;;
   pull)
@@ -73,6 +107,7 @@ case "$cmd" in
     compose logs -f --tail=200 "$service"
     ;;
   config)
+    ensure_runtime_config
     compose config
     ;;
   help|-h|--help)

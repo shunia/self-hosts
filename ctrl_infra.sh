@@ -2,8 +2,13 @@
 set -euo pipefail
 
 COMPOSE_FILE="docker-compose.yml"
+TEMPLATES_DIR="templates"
+GENERATED_DIR="generated-config"
 
 cd "$(dirname "$0")"
+
+# shellcheck disable=SC1091
+source "./runtime_config.sh"
 
 if [[ ! -f "$COMPOSE_FILE" ]]; then
   echo "[ERROR] Missing $COMPOSE_FILE" >&2
@@ -12,6 +17,25 @@ fi
 
 compose() {
   docker compose -f "$COMPOSE_FILE" "$@"
+}
+
+ensure_runtime_files() {
+  runtime_config_generate_infra "$TEMPLATES_DIR" "$GENERATED_DIR"
+}
+
+ensure_permissions() {
+  [[ -f ".env.backup" ]] && chmod 600 ".env.backup"
+
+  if [[ -d "traefik-data/logs" ]]; then
+    chmod 700 "traefik-data/logs"
+  fi
+  [[ -f "traefik-data/acme.json" ]] && chmod 600 "traefik-data/acme.json"
+  [[ -f "traefik-data/logs/access.log" ]] && chmod 600 "traefik-data/logs/access.log"
+
+  if [[ -d "vw-data" ]]; then
+    find "vw-data" -type d -exec chmod 700 {} +
+    find "vw-data" -type f -exec chmod 600 {} +
+  fi
 }
 
 usage() {
@@ -42,15 +66,21 @@ shift || true
 
 case "$cmd" in
   start)
+    ensure_runtime_files
+    ensure_permissions
     compose up -d
     ;;
   stop)
     compose stop
     ;;
   restart)
+    ensure_runtime_files
+    ensure_permissions
     compose restart
     ;;
   rebuild)
+    ensure_runtime_files
+    ensure_permissions
     compose up -d --force-recreate --remove-orphans
     ;;
   pull)
@@ -71,6 +101,7 @@ case "$cmd" in
     fi
     ;;
   config)
+    ensure_runtime_files
     compose config
     ;;
   help|-h|--help)
