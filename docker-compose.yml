@@ -89,6 +89,37 @@ services:
       - "traefik.http.services.xray.loadbalancer.server.scheme=h2c"
       - "traefik.http.services.xray.loadbalancer.server.port=10000"
 
+  projects:
+    build:
+      context: "./projects-server"
+    image: "docker-compose-projects:local"
+    container_name: "projects"
+    restart: unless-stopped
+    environment:
+      PROJECTS_BIND_HOST: "0.0.0.0"
+      PROJECTS_PORT: "8080"
+      XRAY_DOMAIN: "${XRAY_DOMAIN:?FILL_XRAY_DOMAIN}"
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    tmpfs:
+      - "/tmp:size=32m,noexec,nosuid,nodev,mode=1777"
+    volumes:
+      - "./projects:/srv/projects:ro"
+      - "./xray-config:/srv/xray:ro"
+    expose:
+      - "8080"
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.http.routers.projects.rule=Host(`${PROJECTS_DOMAIN:?FILL_PROJECTS_DOMAIN}`)"
+      - "traefik.http.routers.projects.entrypoints=websecure"
+      - "traefik.http.routers.projects.tls.certresolver=myresolver"
+      - "traefik.http.services.projects.loadbalancer.server.port=8080"
+
   homepage:
     image: "ghcr.io/gethomepage/homepage:latest"
     container_name: "homepage"

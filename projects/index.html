@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Projects</title>
+    <style>
+      :root {
+        --bg: #f4f1ea;
+        --panel: rgba(255, 252, 247, 0.86);
+        --ink: #172033;
+        --muted: #556072;
+        --accent: #c24b2f;
+        --accent-2: #1f6b62;
+        --line: rgba(23, 32, 51, 0.12);
+        --shadow: 0 24px 60px rgba(23, 32, 51, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "IBM Plex Sans", "Noto Sans SC", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(194, 75, 47, 0.2), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(31, 107, 98, 0.18), transparent 24%),
+          linear-gradient(135deg, #efe5d6 0%, var(--bg) 58%, #ece8df 100%);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      main {
+        width: min(760px, 100%);
+        background: var(--panel);
+        backdrop-filter: blur(14px);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        padding: 28px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      ul {
+        margin: 24px 0 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 14px;
+      }
+
+      a {
+        display: block;
+        padding: 16px 18px;
+        border-radius: 18px;
+        text-decoration: none;
+        color: inherit;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(23, 32, 51, 0.08);
+        transition: transform 180ms ease, border-color 180ms ease;
+      }
+
+      a:hover {
+        transform: translateY(-2px);
+        border-color: rgba(194, 75, 47, 0.32);
+      }
+
+      strong {
+        display: block;
+        font-size: 1.05rem;
+        margin-bottom: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Projects</h1>
+      <p>这里提供通过 `projects` 域名发布的静态页面。Xray 二维码页虽然不放在 `projects/` 目录中，但会通过服务侧路径映射在这里独立访问。</p>
+      <ul>
+        <li>
+          <a href="/xray_qrcode.html">
+            <strong>Xray QR Code</strong>
+            当前 Xray 节点的客户端选择、二维码与导入链接页面。
+          </a>
+        </li>
+      </ul>
+    </main>
+  </body>
+  </html>

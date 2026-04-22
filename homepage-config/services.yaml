@@ -16,6 +16,10 @@
         href: "https://xray.260055.xyz"
         description: "VLESS over XHTTP H2 endpoint"
         icon: "mdi-access-point-network"
+    - Projects:
+        href: "https://projects.qfhuang.pw/xray_qrcode.html"
+        description: "Static pages and Xray QR generator"
+        icon: "mdi-file-link"
     - CLIProxyAPI:
         href: "https://cpa.qfhuang.pw/management.html"
         description: "CLI proxy API"

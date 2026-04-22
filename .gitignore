@@ -24,6 +24,8 @@ _restore/
 
 # Tooling
 .codex/
+__pycache__/
+*.pyc
 
 # Logs
 homepage-config/logs/

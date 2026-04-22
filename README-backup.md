@@ -28,7 +28,7 @@
   - `.env`、`.env.sub2api`
   - `docker-compose*.yml`
   - `ctrl_*.sh`、`install_vaultwarden.sh`
-  - `homepage-config/`
+  - `homepage-config/`、`projects/`、`projects-server/`、`xray-config/`
   - `traefik-data/`、`vw-data/`、`cliproxyapi-data/`、`lobehub-data/`、`sub2api-data/`、`sub2api-redis-data/`
   - `_backup_staging/<timestamp>/` 下生成的 SQL 导出文件
 - 应用保留策略（`keep-daily/weekly/monthly` + `forget --prune`）。
