@@ -14,6 +14,7 @@ import segno
 HOST = os.environ.get("PROJECTS_BIND_HOST", "0.0.0.0")
 PORT = int(os.environ.get("PROJECTS_PORT", "8080"))
 XRAY_DOMAIN = os.environ["XRAY_DOMAIN"]
+XRAY_SHARE_ENABLED = os.environ.get("XRAY_SHARE_ENABLED", "false").lower() == "true"
 
 PROJECTS_ROOT = Path("/srv/projects").resolve()
 XRAY_ROOT = Path("/srv/xray").resolve()
@@ -154,21 +155,31 @@ class Handler(BaseHTTPRequestHandler):
     def dispatch(self, send_body: bool) -> None:
         parsed = urlparse(self.path)
 
-        if parsed.path == "/__meta/xray-share.json":
-            self.serve_json(build_payload(), send_body=send_body)
-            return
+        if parsed.path in {
+            "/__meta/xray-share.json",
+            "/__meta/xray-link.txt",
+            "/__meta/xray-qr.svg",
+            "/xray_qrcode.html",
+        }:
+            if not XRAY_SHARE_ENABLED:
+                self.send_error(404)
+                return
 
-        if parsed.path == "/__meta/xray-link.txt":
-            self.serve_link(parsed.query, send_body=send_body)
-            return
+            if parsed.path == "/__meta/xray-share.json":
+                self.serve_json(build_payload(), send_body=send_body)
+                return
 
-        if parsed.path == "/__meta/xray-qr.svg":
-            self.serve_qr(parsed.query, send_body=send_body)
-            return
+            if parsed.path == "/__meta/xray-link.txt":
+                self.serve_link(parsed.query, send_body=send_body)
+                return
 
-        if parsed.path == "/xray_qrcode.html":
-            self.serve_file(XRAY_HTML, cache=False, send_body=send_body)
-            return
+            if parsed.path == "/__meta/xray-qr.svg":
+                self.serve_qr(parsed.query, send_body=send_body)
+                return
+
+            if parsed.path == "/xray_qrcode.html":
+                self.serve_file(XRAY_HTML, cache=False, send_body=send_body)
+                return
 
         path = safe_static_path(parsed.path)
         if path is None:

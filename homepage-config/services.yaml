@@ -1,26 +1,22 @@
 ---
 - Infrastructure:
     - Homepage:
-        href: "https://home.qfhuang.pw"
+        href: "https://home.example.com"
         description: "Service portal"
         icon: "homepage.png"
     - Traefik Dashboard:
-        href: "https://traefik.qfhuang.pw"
+        href: "https://traefik.example.com"
         description: "Reverse proxy dashboard"
         icon: "traefik.png"
     - Vaultwarden:
-        href: "https://vaultwarden.qfhuang.pw"
+        href: "https://vaultwarden.example.com"
         description: "Password manager"
         icon: "vaultwarden.png"
     - Xray:
-        href: "https://xray.260055.xyz"
+        href: "https://xray.example.com"
         description: "VLESS over XHTTP H2 endpoint"
         icon: "mdi-access-point-network"
-    - Projects:
-        href: "https://projects.qfhuang.pw/xray_qrcode.html"
-        description: "Static pages and Xray QR generator"
-        icon: "mdi-file-link"
     - CLIProxyAPI:
-        href: "https://cpa.qfhuang.pw/management.html"
+        href: "https://cpa.example.com/management.html"
         description: "CLI proxy API"
         icon: "mdi-api"
