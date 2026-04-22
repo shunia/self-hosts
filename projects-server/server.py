@@ -15,6 +15,11 @@ HOST = os.environ.get("PROJECTS_BIND_HOST", "0.0.0.0")
 PORT = int(os.environ.get("PROJECTS_PORT", "8080"))
 XRAY_DOMAIN = os.environ["XRAY_DOMAIN"]
 XRAY_SHARE_ENABLED = os.environ.get("XRAY_SHARE_ENABLED", "false").lower() == "true"
+PRIVATE_PREFIX = "/private"
+XRAY_SHARE_PAGE = f"{PRIVATE_PREFIX}/xray_qrcode.html"
+XRAY_SHARE_JSON = f"{PRIVATE_PREFIX}/__meta/xray-share.json"
+XRAY_SHARE_LINK = f"{PRIVATE_PREFIX}/__meta/xray-link.txt"
+XRAY_SHARE_QR = f"{PRIVATE_PREFIX}/__meta/xray-qr.svg"
 
 PROJECTS_ROOT = Path("/srv/projects").resolve()
 XRAY_ROOT = Path("/srv/xray").resolve()
@@ -156,28 +161,28 @@ class Handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
 
         if parsed.path in {
-            "/__meta/xray-share.json",
-            "/__meta/xray-link.txt",
-            "/__meta/xray-qr.svg",
-            "/xray_qrcode.html",
+            XRAY_SHARE_JSON,
+            XRAY_SHARE_LINK,
+            XRAY_SHARE_QR,
+            XRAY_SHARE_PAGE,
         }:
             if not XRAY_SHARE_ENABLED:
                 self.send_error(404)
                 return
 
-            if parsed.path == "/__meta/xray-share.json":
+            if parsed.path == XRAY_SHARE_JSON:
                 self.serve_json(build_payload(), send_body=send_body)
                 return
 
-            if parsed.path == "/__meta/xray-link.txt":
+            if parsed.path == XRAY_SHARE_LINK:
                 self.serve_link(parsed.query, send_body=send_body)
                 return
 
-            if parsed.path == "/__meta/xray-qr.svg":
+            if parsed.path == XRAY_SHARE_QR:
                 self.serve_qr(parsed.query, send_body=send_body)
                 return
 
-            if parsed.path == "/xray_qrcode.html":
+            if parsed.path == XRAY_SHARE_PAGE:
                 self.serve_file(XRAY_HTML, cache=False, send_body=send_body)
                 return
 

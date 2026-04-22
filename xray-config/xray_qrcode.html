@@ -338,7 +338,7 @@
         elements.notes.textContent = profile.notes;
         elements.shareUri.value = profile.uri;
         elements.openLink.href = profile.uri;
-        elements.qrImage.src = `/__meta/xray-qr.svg?client=${encodeURIComponent(profile.id)}&t=${Date.now()}`;
+        elements.qrImage.src = `/private/__meta/xray-qr.svg?client=${encodeURIComponent(profile.id)}&t=${Date.now()}`;
         elements.domain.textContent = share.domain;
         elements.port.textContent = String(share.port);
         elements.path.textContent = share.path;
@@ -357,7 +357,7 @@
       }
 
       async function loadPayload() {
-        const response = await fetch("/__meta/xray-share.json", { cache: "no-store" });
+        const response = await fetch("/private/__meta/xray-share.json", { cache: "no-store" });
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }

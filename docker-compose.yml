@@ -101,6 +101,7 @@ services:
       PROJECTS_BIND_HOST: "0.0.0.0"
       PROJECTS_PORT: "8080"
       XRAY_DOMAIN: "${XRAY_DOMAIN:?FILL_XRAY_DOMAIN}"
+      XRAY_SHARE_ENABLED: "true"
     security_opt:
       - "no-new-privileges:true"
     cap_drop:
@@ -121,6 +122,18 @@ services:
       - "traefik.http.routers.projects.rule=Host(`${PROJECTS_DOMAIN:?FILL_PROJECTS_DOMAIN}`)"
       - "traefik.http.routers.projects.entrypoints=websecure"
       - "traefik.http.routers.projects.tls.certresolver=myresolver"
+      - "traefik.http.routers.projects.priority=10"
+      - "traefik.http.routers.projects-private.rule=Host(`${PROJECTS_DOMAIN:?FILL_PROJECTS_DOMAIN}`) && (Path(`/private`) || PathPrefix(`/private/`))"
+      - "traefik.http.routers.projects-private.entrypoints=websecure"
+      - "traefik.http.routers.projects-private.tls.certresolver=myresolver"
+      - "traefik.http.routers.projects-private.priority=200"
+      - "traefik.http.routers.projects-private.service=projects"
+      - "traefik.http.routers.projects-private.middlewares=projects-private-auth,projects-private-ratelimit"
+      - "traefik.http.routers.projects-private.observability.accesslogs=false"
+      - "traefik.http.middlewares.projects-private-auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH:?FILL_TRAEFIK_DASHBOARD_AUTH_BCRYPT}"
+      - "traefik.http.middlewares.projects-private-ratelimit.ratelimit.average=10"
+      - "traefik.http.middlewares.projects-private-ratelimit.ratelimit.period=1m"
+      - "traefik.http.middlewares.projects-private-ratelimit.ratelimit.burst=20"
       - "traefik.http.services.projects.loadbalancer.server.port=8080"
 
   homepage:
